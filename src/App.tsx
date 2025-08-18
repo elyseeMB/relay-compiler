@@ -1,37 +1,32 @@
-import { useToast } from "./hooks/useToast.tsx";
-import { useButton } from "./hooks/useButton.tsx";
-import { useEffect } from "react";
-import { useMessage } from "./hooks/useTest.tsx";
+import { graphql, useLazyLoadQuery } from "react-relay";
 
-function App() {
+import { useToast } from "./hooks/useToast.tsx";
+import Film from "./components/films/Film.tsx";
+import { AppQuery } from "./__generated__/AppQuery.graphql.ts";
+
+function App({ name }: { name: string }) {
   const { pushToast } = useToast();
 
-  function onSubmit() {
-    pushToast({
-      title: "je suis le titre",
-      content: "je suis le contenu",
-      // duration: 2,
-    });
-  }
-
-  function onSubmit2() {
-    pushToast({
-      title: "je suis le titre 2",
-      content: "je suis le contenu 2",
-      // duration: 2,
-    });
-  }
+  const data = useLazyLoadQuery<AppQuery>(
+    graphql`
+      query AppQuery {
+        allFilms {
+          films {
+            id
+            ...Film_item
+          }
+        }
+      }
+    `,
+    {}
+  );
 
   return (
     <div className="container is-max-desktop p-5">
       <div className="is-flex is-justify-content-center is-align-items-center">
-        <button onClick={onSubmit} className="button is-primary">
-          Ajouter un nouveau toast
-        </button>
-
-        <button onClick={onSubmit2} className="button is-secondary">
-          Ajouter un nouveau toast 2
-        </button>
+        {data.allFilms!.films!.map((film) => (
+          <Film key={film!.id} film={film!} />
+        ))}
       </div>
     </div>
   );

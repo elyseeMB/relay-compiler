@@ -5,7 +5,7 @@ type ParamsProps = {
 
 export function Toast({ title, content }: ParamsProps) {
   return (
-    <div className="notification is-info">
+    <div className="notification is-danger">
       <div className="is-flex-direction-column">
         <span>
           <strong>{title}</strong>

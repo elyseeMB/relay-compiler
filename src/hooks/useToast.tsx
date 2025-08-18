@@ -9,68 +9,67 @@ import {
 } from "react";
 import { Toast } from "../components/Toast.tsx";
 
-type Params = ComponentProps<typeof Toast> & { duration?: number };
-type ToastsItems = ComponentProps<typeof Toast> & {
-  id: number;
-  timer: ReturnType<typeof setTimeout>;
+type Params = ComponentProps<typeof Toast> &
+  Partial<{
+    duration: number;
+    id: number;
+    timer: ReturnType<typeof setTimeout>;
+  }>;
+
+//@ts-ignore
+const defaultFunc = (props: Params) => {};
+
+const pushToastGlobal = {
+  pushToastRef: { current: defaultFunc },
 };
 
-const defaultFunction = (toast: Params) => {};
+const toastContext = createContext(pushToastGlobal);
 
-const defaultValue = {
-  pushToastRef: { current: defaultFunction },
-};
-
-const ToastContext = createContext(defaultValue);
-
-export function ToastContextProvider({ children }: PropsWithChildren) {
-  const pushToastRef = useRef(defaultFunction);
+export function ToastContextProvider(props: PropsWithChildren) {
+  const pushToastRef = useRef(defaultFunc);
   return (
-    <ToastContext.Provider value={{ pushToastRef }}>
-      {children}
+    <toastContext.Provider value={{ pushToastRef }}>
+      {props.children}
       <Toasts />
-    </ToastContext.Provider>
+    </toastContext.Provider>
   );
 }
 
 export function useToast() {
-  const { pushToastRef } = useContext(ToastContext);
+  const { pushToastRef } = useContext(toastContext);
   return {
     pushToast: useCallback(
-      (toast: Params) => {
-        pushToastRef.current(toast);
+      (props: Params) => {
+        pushToastRef.current(props);
       },
       [pushToastRef]
     ),
   };
 }
 
-function Toasts() {
-  const [toasts, setToasts] = useState([] as ToastsItems[]);
-  const { pushToastRef } = useContext(ToastContext);
-  pushToastRef.current = ({ duration, ...props }: Params) => {
+export function Toasts() {
+  const [toasts, setToasts] = useState<Params[]>([]);
+  const { pushToastRef } = useContext(toastContext);
+
+  pushToastRef.current = (props: Params) => {
     const id = Date.now();
     const timer = setTimeout(() => {
-      setToasts((v) => v.filter((t) => t.id !== id));
-    }, duration ?? 5 * 1000);
-    const toast = { ...props, id, timer };
+      setToasts((s) => s.filter((toast) => toast.id !== id));
+    }, (props.duration ?? 5) * 1000);
+    const toast = { ...props, timer, id };
     setToasts((v) => [...v, toast]);
   };
 
-  function onRemove(toast: ToastsItems) {
-    clearTimeout(toast.timer);
-    setToasts((v) => v.filter((t) => t !== toast));
-  }
+  const onRemove = (props: Params) => {
+    clearTimeout(props.timer);
+    setToasts((v) => v.filter((v) => v !== props));
+  };
 
   return (
     <div>
-      {toasts.map((toast) => (
-        <div
-          key={toast.id}
-          onClick={() => onRemove(toast)}
-          className="container"
-        >
-          <Toast {...toast} />
+      {toasts.map((props, index) => (
+        <div key={index} onClick={() => onRemove(props)}>
+          <Toast {...props} />
         </div>
       ))}
     </div>
