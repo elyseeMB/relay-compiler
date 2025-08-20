@@ -1,0 +1,64 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+interface Entity {
+  id: ID!
+}
+
+enum Role {
+  ADMIN
+  CUSTOMER
+}
+
+enum Status {
+  PRIVATE
+  PUBLIC
+}
+
+enum AccessLevel {
+  FREE
+  PAID
+}
+
+type Author implements Entity {
+  id: ID!
+  name: String!
+  role: Role!
+}
+
+type Article implements Entity {
+  id: ID!
+  title: String!
+  summary: String
+  body: String!
+  accessLevel: AccessLevel!
+  status: Status!
+  authors: Author!
+  draft: Boolean!
+}
+
+type Query {
+  authors: [Author!]!
+  articles: [Article!]!
+}
+
+input NewArtcile {
+  authorId: ID!
+  title: String!
+  summary: String
+  body: String!
+  draft: Boolean = false
+  status: Status = PRIVATE
+  accessLevel: AccessLevel = FREE
+}
+
+input newAuthor {
+  name: String!
+  role: Role = ADMIN
+}
+
+type Mutation {
+  createAuthor(input: newAuthor!): Author!
+  createArticle(input: NewArtcile!): Article!
+}
