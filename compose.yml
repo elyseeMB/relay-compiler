@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: "postgres:17.4"
+    ports:
+      - "5432:5432"
+    volumes:
+      - "./compose/postgres:/docker-entrypoint-initdb.d:ro"
+      - "postgres-data-relay_compiler:/var/lib/postgresql/data:rw"
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+
+
+
+volumes:
+  postgres-data-relay_compiler:
