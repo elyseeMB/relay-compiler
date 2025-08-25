@@ -1,8 +1,6 @@
-package main
+package console_v1
 
 import (
-	"context"
-	"log"
 	"net/http"
 	"os"
 
@@ -11,22 +9,38 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/elyseeMB/relay-compiler/graph"
-	"github.com/elyseeMB/relay-compiler/pkg/db"
+	"github.com/elyseeMB/relay-compiler/pkg/server/api/console/v1/schema"
+	"github.com/go-chi/chi/v5"
 	"github.com/vektah/gqlparser/v2/ast"
-	"go.gearno.de/kit/unit"
 )
+
+// This file will not be regenerated automatically.
+//
+// It serves as dependency injection for your app, add any dependencies you require here.
+
+type Resolver struct{}
 
 const defaultPort = "8080"
 
-func main() {
+func NewMux() *chi.Mux {
 
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = defaultPort
 	}
 
-	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
+	r := chi.NewMux()
+
+	r.Get("/", playground.Handler("GraphQL", "/api/console/v1/query"))
+	r.Post("/query", graphqlHandler())
+
+	return r
+
+}
+
+func graphqlHandler() http.HandlerFunc {
+
+	srv := handler.New(schema.NewExecutableSchema(schema.Config{Resolvers: &Resolver{}}))
 
 	srv.AddTransport(transport.Options{})
 	srv.AddTransport(transport.GET{})
@@ -39,17 +53,6 @@ func main() {
 		Cache: lru.New[string](100),
 	})
 
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", srv)
+	return srv.ServeHTTP
 
-	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-
-	impl := db.New()
-	unit := unit.NewUnit(impl, "tp", "v1", "dev")
-
-	err := unit.Run()
-	if err != nil && err != context.Canceled {
-		panic(err)
-	}
-	log.Fatal(http.ListenAndServe(":"+port, nil))
 }

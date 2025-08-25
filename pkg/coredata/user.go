@@ -7,8 +7,9 @@ import (
 type (
 	User struct {
 		ID       string `db:"id"`
-		fullName string `db:"fullname"`
+		FullName string `db:"fullname"`
 		Email    string `db:"email"`
+		Role     string `db:"role"`
 	}
 
 	Users []*User
@@ -21,7 +22,3 @@ type (
 func (e ErrUserNotFound) Error() string {
 	return fmt.Sprintf("user not found: %q", e.Identifier)
 }
-
-// func (u *User) Insert(ctx context.Context, conn pg.Conn) error {
-
-// }

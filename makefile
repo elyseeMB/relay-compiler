@@ -3,15 +3,21 @@ DOCKER_COMPOSE= $(DOCKER) compose -f compose.yml $(DOCKER_COMPOSE_FLAGS)
 
 
 .PHONY: dev
-
 dev: ## start environment develop
 	@make -j2 stack-up backend frontend
 
 frontend:
 	pnpm run dev
 
+
+
+.PHONY: backend
 backend:
-	go run ./server.go
+	go run cmd/relay-compiler/main.go
+
+.PHONY: generate
+generate:
+	go run github.com/99designs/gqlgen generate
 
 
 .PHONY: stack-up
