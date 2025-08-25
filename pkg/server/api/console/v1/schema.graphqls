@@ -21,9 +21,10 @@ enum AccessLevel {
   PAID
 }
 
-type Author implements Entity {
+type User implements Entity {
   id: ID!
-  name: String!
+  Email: String!
+  fullName: String!
   role: Role!
 }
 
@@ -34,12 +35,12 @@ type Article implements Entity {
   body: String!
   accessLevel: AccessLevel!
   status: Status!
-  authors: Author!
+  users: User!
   draft: Boolean!
 }
 
 type Query {
-  authors: [Author!]!
+  users: [User!]!
   articles: [Article!]!
 }
 
@@ -59,6 +60,6 @@ input newAuthor {
 }
 
 type Mutation {
-  createAuthor(input: newAuthor!): Author!
+  createAuthor(input: newAuthor!): User!
   createArticle(input: NewArtcile!): Article!
 }
