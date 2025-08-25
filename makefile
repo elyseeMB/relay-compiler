@@ -10,7 +10,6 @@ frontend:
 	pnpm run dev
 
 
-
 .PHONY: backend
 backend:
 	go run cmd/relay-compiler/main.go

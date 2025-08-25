@@ -12,22 +12,31 @@ import (
 	"github.com/elyseeMB/relay-compiler/pkg/server/api/console/v1/types"
 )
 
-// CreateAuthor is the resolver for the createAuthor field.
-func (r *mutationResolver) CreateAuthor(ctx context.Context, input types.NewAuthor) (*types.User, error) {
-	panic(fmt.Errorf("not implemented: CreateAuthor - createAuthor"))
+// CreateUser is the resolver for the createUser field.
+func (r *mutationResolver) CreateUser(ctx context.Context, input types.NewUser) (*types.User, error) {
+	user := &types.User{
+		ID:       fmt.Sprintf("%d", len(r.Resolver.Users)+1),
+		FullName: input.FullName,
+		Email:    input.Email,
+		Role:     *input.Role,
+	}
+
+	r.Resolver.Users = append(r.Resolver.Users, user)
+	return user, nil
 }
 
 // CreateArticle is the resolver for the createArticle field.
-func (r *mutationResolver) CreateArticle(ctx context.Context, input types.NewArtcile) (*types.Article, error) {
+func (r *mutationResolver) CreateArticle(ctx context.Context, input types.NewArticle) (*types.Article, error) {
 	panic(fmt.Errorf("not implemented: CreateArticle - createArticle"))
 }
 
 // Users is the resolver for the users field.
 func (r *queryResolver) Users(ctx context.Context) ([]*types.User, error) {
-	panic(fmt.Errorf("not implemented: Users - users"))
+	return r.Resolver.Users, nil
 }
 
 // Articles is the resolver for the articles field.
+
 func (r *queryResolver) Articles(ctx context.Context) ([]*types.Article, error) {
 	panic(fmt.Errorf("not implemented: Articles - articles"))
 }

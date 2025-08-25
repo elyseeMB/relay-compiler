@@ -58,8 +58,8 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		CreateArticle func(childComplexity int, input types.NewArtcile) int
-		CreateAuthor  func(childComplexity int, input types.NewAuthor) int
+		CreateArticle func(childComplexity int, input types.NewArticle) int
+		CreateUser    func(childComplexity int, input types.NewUser) int
 	}
 
 	Query struct {
@@ -76,8 +76,8 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	CreateAuthor(ctx context.Context, input types.NewAuthor) (*types.User, error)
-	CreateArticle(ctx context.Context, input types.NewArtcile) (*types.Article, error)
+	CreateUser(ctx context.Context, input types.NewUser) (*types.User, error)
+	CreateArticle(ctx context.Context, input types.NewArticle) (*types.Article, error)
 }
 type QueryResolver interface {
 	Users(ctx context.Context) ([]*types.User, error)
@@ -169,19 +169,19 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateArticle(childComplexity, args["input"].(types.NewArtcile)), true
+		return e.complexity.Mutation.CreateArticle(childComplexity, args["input"].(types.NewArticle)), true
 
-	case "Mutation.createAuthor":
-		if e.complexity.Mutation.CreateAuthor == nil {
+	case "Mutation.createUser":
+		if e.complexity.Mutation.CreateUser == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_createAuthor_args(ctx, rawArgs)
+		args, err := ec.field_Mutation_createUser_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateAuthor(childComplexity, args["input"].(types.NewAuthor)), true
+		return e.complexity.Mutation.CreateUser(childComplexity, args["input"].(types.NewUser)), true
 
 	case "Query.articles":
 		if e.complexity.Query.Articles == nil {
@@ -197,7 +197,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Query.Users(childComplexity), true
 
-	case "User.Email":
+	case "User.email":
 		if e.complexity.User.Email == nil {
 			break
 		}
@@ -233,8 +233,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
-		ec.unmarshalInputNewArtcile,
-		ec.unmarshalInputnewAuthor,
+		ec.unmarshalInputNewArticle,
+		ec.unmarshalInputNewUser,
 	)
 	first := true
 
@@ -357,7 +357,7 @@ enum AccessLevel {
 
 type User implements Entity {
   id: ID!
-  Email: String!
+  email: String!
   fullName: String!
   role: Role!
 }
@@ -378,8 +378,8 @@ type Query {
   articles: [Article!]!
 }
 
-input NewArtcile {
-  authorId: ID!
+input NewArticle {
+  UserId: ID!
   title: String!
   summary: String
   body: String!
@@ -388,14 +388,15 @@ input NewArtcile {
   accessLevel: AccessLevel = FREE
 }
 
-input newAuthor {
-  name: String!
+input NewUser {
+  fullName: String!
+  email: String!
   role: Role = ADMIN
 }
 
 type Mutation {
-  createAuthor(input: newAuthor!): User!
-  createArticle(input: NewArtcile!): Article!
+  createUser(input: NewUser!): User!
+  createArticle(input: NewArticle!): Article!
 }
 `, BuiltIn: false},
 }
@@ -408,7 +409,7 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 func (ec *executionContext) field_Mutation_createArticle_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNNewArtcile2githubᚗcomᚋelyseeMBᚋrelayᚑcompilerᚋpkgᚋserverᚋapiᚋconsoleᚋv1ᚋtypesᚐNewArtcile)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNNewArticle2githubᚗcomᚋelyseeMBᚋrelayᚑcompilerᚋpkgᚋserverᚋapiᚋconsoleᚋv1ᚋtypesᚐNewArticle)
 	if err != nil {
 		return nil, err
 	}
@@ -416,10 +417,10 @@ func (ec *executionContext) field_Mutation_createArticle_args(ctx context.Contex
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_createAuthor_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNnewAuthor2githubᚗcomᚋelyseeMBᚋrelayᚑcompilerᚋpkgᚋserverᚋapiᚋconsoleᚋv1ᚋtypesᚐNewAuthor)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNNewUser2githubᚗcomᚋelyseeMBᚋrelayᚑcompilerᚋpkgᚋserverᚋapiᚋconsoleᚋv1ᚋtypesᚐNewUser)
 	if err != nil {
 		return nil, err
 	}
@@ -792,8 +793,8 @@ func (ec *executionContext) fieldContext_Article_users(_ context.Context, field 
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_User_id(ctx, field)
-			case "Email":
-				return ec.fieldContext_User_Email(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
 			case "fullName":
 				return ec.fieldContext_User_fullName(ctx, field)
 			case "role":
@@ -849,8 +850,8 @@ func (ec *executionContext) fieldContext_Article_draft(_ context.Context, field 
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_createAuthor(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_createAuthor(ctx, field)
+func (ec *executionContext) _Mutation_createUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_createUser(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -863,7 +864,7 @@ func (ec *executionContext) _Mutation_createAuthor(ctx context.Context, field gr
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateAuthor(rctx, fc.Args["input"].(types.NewAuthor))
+		return ec.resolvers.Mutation().CreateUser(rctx, fc.Args["input"].(types.NewUser))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -880,7 +881,7 @@ func (ec *executionContext) _Mutation_createAuthor(ctx context.Context, field gr
 	return ec.marshalNUser2ᚖgithubᚗcomᚋelyseeMBᚋrelayᚑcompilerᚋpkgᚋserverᚋapiᚋconsoleᚋv1ᚋtypesᚐUser(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Mutation_createAuthor(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_createUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -890,8 +891,8 @@ func (ec *executionContext) fieldContext_Mutation_createAuthor(ctx context.Conte
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_User_id(ctx, field)
-			case "Email":
-				return ec.fieldContext_User_Email(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
 			case "fullName":
 				return ec.fieldContext_User_fullName(ctx, field)
 			case "role":
@@ -907,7 +908,7 @@ func (ec *executionContext) fieldContext_Mutation_createAuthor(ctx context.Conte
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_createAuthor_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_createUser_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -928,7 +929,7 @@ func (ec *executionContext) _Mutation_createArticle(ctx context.Context, field g
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateArticle(rctx, fc.Args["input"].(types.NewArtcile))
+		return ec.resolvers.Mutation().CreateArticle(rctx, fc.Args["input"].(types.NewArticle))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1028,8 +1029,8 @@ func (ec *executionContext) fieldContext_Query_users(_ context.Context, field gr
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_User_id(ctx, field)
-			case "Email":
-				return ec.fieldContext_User_Email(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
 			case "fullName":
 				return ec.fieldContext_User_fullName(ctx, field)
 			case "role":
@@ -1278,8 +1279,8 @@ func (ec *executionContext) fieldContext_User_id(_ context.Context, field graphq
 	return fc, nil
 }
 
-func (ec *executionContext) _User_Email(ctx context.Context, field graphql.CollectedField, obj *types.User) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_User_Email(ctx, field)
+func (ec *executionContext) _User_email(ctx context.Context, field graphql.CollectedField, obj *types.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_email(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1309,7 +1310,7 @@ func (ec *executionContext) _User_Email(ctx context.Context, field graphql.Colle
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_User_Email(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_User_email(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "User",
 		Field:      field,
@@ -3361,8 +3362,8 @@ func (ec *executionContext) fieldContext___Type_isOneOf(_ context.Context, field
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputNewArtcile(ctx context.Context, obj any) (types.NewArtcile, error) {
-	var it types.NewArtcile
+func (ec *executionContext) unmarshalInputNewArticle(ctx context.Context, obj any) (types.NewArticle, error) {
+	var it types.NewArticle
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -3378,20 +3379,20 @@ func (ec *executionContext) unmarshalInputNewArtcile(ctx context.Context, obj an
 		asMap["accessLevel"] = "FREE"
 	}
 
-	fieldsInOrder := [...]string{"authorId", "title", "summary", "body", "draft", "status", "accessLevel"}
+	fieldsInOrder := [...]string{"UserId", "title", "summary", "body", "draft", "status", "accessLevel"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "authorId":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("authorId"))
+		case "UserId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("UserId"))
 			data, err := ec.unmarshalNID2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.AuthorID = data
+			it.UserID = data
 		case "title":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("title"))
 			data, err := ec.unmarshalNString2string(ctx, v)
@@ -3440,8 +3441,8 @@ func (ec *executionContext) unmarshalInputNewArtcile(ctx context.Context, obj an
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputnewAuthor(ctx context.Context, obj any) (types.NewAuthor, error) {
-	var it types.NewAuthor
+func (ec *executionContext) unmarshalInputNewUser(ctx context.Context, obj any) (types.NewUser, error) {
+	var it types.NewUser
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -3451,20 +3452,27 @@ func (ec *executionContext) unmarshalInputnewAuthor(ctx context.Context, obj any
 		asMap["role"] = "ADMIN"
 	}
 
-	fieldsInOrder := [...]string{"name", "role"}
+	fieldsInOrder := [...]string{"fullName", "email", "role"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "name":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+		case "fullName":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fullName"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.Name = data
+			it.FullName = data
+		case "email":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Email = data
 		case "role":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("role"))
 			data, err := ec.unmarshalORole2ᚖgithubᚗcomᚋelyseeMBᚋrelayᚑcompilerᚋpkgᚋserverᚋapiᚋconsoleᚋv1ᚋtypesᚐRole(ctx, v)
@@ -3599,9 +3607,9 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
-		case "createAuthor":
+		case "createUser":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_createAuthor(ctx, field)
+				return ec._Mutation_createUser(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -3746,8 +3754,8 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "Email":
-			out.Values[i] = ec._User_Email(ctx, field, obj)
+		case "email":
+			out.Values[i] = ec._User_email(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -4219,8 +4227,13 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 	return res
 }
 
-func (ec *executionContext) unmarshalNNewArtcile2githubᚗcomᚋelyseeMBᚋrelayᚑcompilerᚋpkgᚋserverᚋapiᚋconsoleᚋv1ᚋtypesᚐNewArtcile(ctx context.Context, v any) (types.NewArtcile, error) {
-	res, err := ec.unmarshalInputNewArtcile(ctx, v)
+func (ec *executionContext) unmarshalNNewArticle2githubᚗcomᚋelyseeMBᚋrelayᚑcompilerᚋpkgᚋserverᚋapiᚋconsoleᚋv1ᚋtypesᚐNewArticle(ctx context.Context, v any) (types.NewArticle, error) {
+	res, err := ec.unmarshalInputNewArticle(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNNewUser2githubᚗcomᚋelyseeMBᚋrelayᚑcompilerᚋpkgᚋserverᚋapiᚋconsoleᚋv1ᚋtypesᚐNewUser(ctx context.Context, v any) (types.NewUser, error) {
+	res, err := ec.unmarshalInputNewUser(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -4569,11 +4582,6 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 		}
 	}
 	return res
-}
-
-func (ec *executionContext) unmarshalNnewAuthor2githubᚗcomᚋelyseeMBᚋrelayᚑcompilerᚋpkgᚋserverᚋapiᚋconsoleᚋv1ᚋtypesᚐNewAuthor(ctx context.Context, v any) (types.NewAuthor, error) {
-	res, err := ec.unmarshalInputnewAuthor(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOAccessLevel2ᚖgithubᚗcomᚋelyseeMBᚋrelayᚑcompilerᚋpkgᚋserverᚋapiᚋconsoleᚋv1ᚋtypesᚐAccessLevel(ctx context.Context, v any) (*types.AccessLevel, error) {

@@ -1,7 +1,3 @@
-# GraphQL schema example
-#
-# https://gqlgen.com/getting-started/
-
 interface Entity {
   id: ID!
 }
@@ -23,7 +19,7 @@ enum AccessLevel {
 
 type User implements Entity {
   id: ID!
-  Email: String!
+  email: String!
   fullName: String!
   role: Role!
 }
@@ -44,8 +40,8 @@ type Query {
   articles: [Article!]!
 }
 
-input NewArtcile {
-  authorId: ID!
+input NewArticle {
+  UserId: ID!
   title: String!
   summary: String
   body: String!
@@ -54,12 +50,13 @@ input NewArtcile {
   accessLevel: AccessLevel = FREE
 }
 
-input newAuthor {
-  name: String!
+input NewUser {
+  fullName: String!
+  email: String!
   role: Role = ADMIN
 }
 
 type Mutation {
-  createAuthor(input: newAuthor!): User!
-  createArticle(input: NewArtcile!): Article!
+  createUser(input: NewUser!): User!
+  createArticle(input: NewArticle!): Article!
 }
