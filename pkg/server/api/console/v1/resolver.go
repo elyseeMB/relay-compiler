@@ -10,6 +10,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/elyseeMB/relay-compiler/pkg/server/api/console/v1/schema"
+	"github.com/elyseeMB/relay-compiler/pkg/server/api/console/v1/types"
 	"github.com/go-chi/chi/v5"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -18,7 +19,10 @@ import (
 //
 // It serves as dependency injection for your app, add any dependencies you require here.
 
-type Resolver struct{}
+type Resolver struct {
+	Articles []*types.Article
+	Users    []*types.User
+}
 
 const defaultPort = "8080"
 

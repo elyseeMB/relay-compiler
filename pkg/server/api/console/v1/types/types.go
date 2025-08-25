@@ -31,8 +31,8 @@ func (this Article) GetID() string { return this.ID }
 type Mutation struct {
 }
 
-type NewArtcile struct {
-	AuthorID    string       `json:"authorId"`
+type NewArticle struct {
+	UserID      string       `json:"UserId"`
 	Title       string       `json:"title"`
 	Summary     *string      `json:"summary,omitempty"`
 	Body        string       `json:"body"`
@@ -41,23 +41,24 @@ type NewArtcile struct {
 	AccessLevel *AccessLevel `json:"accessLevel,omitempty"`
 }
 
+type NewUser struct {
+	FullName string `json:"fullName"`
+	Email    string `json:"email"`
+	Role     *Role  `json:"role,omitempty"`
+}
+
 type Query struct {
 }
 
 type User struct {
 	ID       string `json:"id"`
-	Email    string `json:"Email"`
+	Email    string `json:"email"`
 	FullName string `json:"fullName"`
 	Role     Role   `json:"role"`
 }
 
 func (User) IsEntity()          {}
 func (this User) GetID() string { return this.ID }
-
-type NewAuthor struct {
-	Name string `json:"name"`
-	Role *Role  `json:"role,omitempty"`
-}
 
 type AccessLevel string
 
