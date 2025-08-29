@@ -1,15 +1,20 @@
 package coredata
 
 import (
+	"context"
+	"errors"
 	"fmt"
+
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
+	"go.gearno.de/kit/pg"
 )
 
 type (
 	User struct {
-		ID       string `db:"id"`
+		ID       int    `db:"id"`
 		FullName string `db:"fullname"`
-		Email    string `db:"email"`
-		Role     string `db:"role"`
+		Password string `db:"password"`
 	}
 
 	Users []*User
@@ -21,4 +26,29 @@ type (
 
 func (e ErrUserNotFound) Error() string {
 	return fmt.Sprintf("user not found: %q", e.Identifier)
+}
+
+func (u *User) Insert(ctx context.Context, conn pg.Conn) error {
+	q := `INSERT INTO users(fullname, password) VALUES (
+	@fullname,
+	@password
+ )`
+
+	args := pgx.StrictNamedArgs{
+		"fullname": u.FullName,
+		"password": u.Password,
+	}
+
+	_, err := conn.Exec(ctx, q, args)
+
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+			return pgErr
+		}
+
+		return err
+	}
+
+	return nil
 }

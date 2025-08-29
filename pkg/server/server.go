@@ -5,7 +5,9 @@ import (
 	"strings"
 
 	"github.com/elyseeMB/relay-compiler/pkg/server/api"
+	"github.com/elyseeMB/relay-compiler/pkg/usrmgr"
 	"github.com/go-chi/chi/v5"
+	"go.gearno.de/kit/log"
 )
 
 type Server struct {
@@ -13,10 +15,20 @@ type Server struct {
 	router    *chi.Mux
 }
 
-func NewServer() (*Server, error) {
-	apiServer, err := api.NewServer(api.Config{
-		AllowedOrigins: []string{"http://localhost:5173"},
-	})
+type Config struct {
+	AllowedOrigins []string
+	Usrmgr         *usrmgr.Service
+	Logger         *log.Logger
+}
+
+func NewServer(cfg Config) (*Server, error) {
+	apiCfg := api.Config{
+		AllowedOrigins: cfg.AllowedOrigins,
+		Usrmgr:         cfg.Usrmgr,
+		Logger:         cfg.Logger.Named("api"),
+	}
+
+	apiServer, err := api.NewServer(apiCfg)
 
 	if err != nil {
 		return nil, err
