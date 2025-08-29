@@ -9,16 +9,16 @@ import { PropsWithChildren } from "react";
 import { RelayEnvironmentProvider } from "react-relay";
 
 function buildEndpoint(path: string): string {
-  const host = import.meta.env.VITE_API_URL;
+  const host = "https://localhost:8080";
 
   if (!host) {
     return path;
   }
 
   const formattedHost =
-    host.startsWith("http://") || host.startsWith("https://")
+    host.startsWith("http://") || host.startsWith("http://")
       ? host
-      : `https://${host}`;
+      : `http://${host}`;
 
   const url = new URL(formattedHost);
 
@@ -35,13 +35,26 @@ const store = new Store(source, {
   gcReleaseBufferSize: 20,
 });
 
-const HTTP_ENDPOINT = "https://graphql.org/graphql/";
+const fetchRelay: FetchFunction = async (
+  request,
+  variables,
+  _,
+  uploadables
+) => {
+  console.log(uploadables, variables);
 
-const fetchRelay: FetchFunction = async (request, variables) => {
-  const resp = await fetch(HTTP_ENDPOINT, {
+  const resp = await fetch("http://localhost:8080/api/console/v1/query", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ query: request.text, variables }),
+    headers: {
+      "Content-Type": "application/json",
+      Accept:
+        "application/graphql-response+json; charset=utf-8, application/json; charset=utf-8",
+    },
+    body: JSON.stringify({
+      operationName: request.name,
+      query: request.text,
+      variables,
+    }),
   });
   if (!resp.ok) {
     throw new Error("Response failed.");

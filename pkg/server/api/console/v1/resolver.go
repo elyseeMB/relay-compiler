@@ -35,6 +35,9 @@ func NewMux() *chi.Mux {
 
 	r := chi.NewMux()
 
+	// Authentification
+	r.Post("/auth/register", SignUpHandler())
+
 	r.Get("/", playground.Handler("GraphQL", "/api/console/v1/query"))
 	r.Post("/query", graphqlHandler())
 

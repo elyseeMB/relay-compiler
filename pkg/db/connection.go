@@ -51,16 +51,17 @@ func (impl *Implm) Run(parentCtx context.Context, l *log.Logger, r prometheus.Re
 	pgClient, err := pg.NewClient(
 		impl.cfg.Pg.Options(pg.WithLogger(l), pg.WithRegisterer(r), pg.WithTracerProvider(tp))...,
 	)
-
-	err = migrator.NewMigrator(pgClient, coredata.Migrations, l.Named("migrations")).Run(parentCtx, "migrations")
-	if (err) != nil {
-		return fmt.Errorf("cannot migrate database schema: %w", err)
-	}
-
 	if err != nil {
 		return fmt.Errorf("Cannot create pg client: %w", err)
 	}
-	pgClient.Close()
+
+	// Exécuter les migrations
+	err = migrator.NewMigrator(pgClient, coredata.Migrations, l.Named("migrations")).Run(parentCtx, "migrations")
+	if err != nil {
+		return fmt.Errorf("cannot migrate database schema: %w", err)
+	}
+
+	defer pgClient.Close()
 	return context.Cause(parentCtx)
 
 }
