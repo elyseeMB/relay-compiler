@@ -11,8 +11,10 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/elyseeMB/relay-compiler/pkg/server/api/console/v1/schema"
 	"github.com/elyseeMB/relay-compiler/pkg/server/api/console/v1/types"
+	"github.com/elyseeMB/relay-compiler/pkg/usrmgr"
 	"github.com/go-chi/chi/v5"
 	"github.com/vektah/gqlparser/v2/ast"
+	"go.gearno.de/kit/log"
 )
 
 // This file will not be regenerated automatically.
@@ -26,7 +28,12 @@ type Resolver struct {
 
 const defaultPort = "8080"
 
-func NewMux() *chi.Mux {
+type ConfigNewMux struct {
+	Logger    *log.Logger
+	UsrmgrSvc *usrmgr.Service
+}
+
+func NewMux(cfg *ConfigNewMux) *chi.Mux {
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -35,8 +42,7 @@ func NewMux() *chi.Mux {
 
 	r := chi.NewMux()
 
-	// Authentification
-	r.Post("/auth/register", SignUpHandler())
+	r.Post("/auth/register", SignUpHandler(cfg.UsrmgrSvc))
 
 	r.Get("/", playground.Handler("GraphQL", "/api/console/v1/query"))
 	r.Post("/query", graphqlHandler())

@@ -2,21 +2,22 @@ package console_v1
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
+	"github.com/elyseeMB/relay-compiler/pkg/usrmgr"
 	"go.gearno.de/kit/httpserver"
 )
 
 type (
 	SignUpRequest struct {
-		Email    string `json:"email"`
+		Password string `json:"password"`
 		FullName string `json:"Fullname"`
-		Role     string `json:"role"`
 	}
 )
 
-func SignUpHandler() http.HandlerFunc {
+func SignUpHandler(usermgrSvc *usrmgr.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		var req SignUpRequest
@@ -26,10 +27,19 @@ func SignUpHandler() http.HandlerFunc {
 			return
 		}
 
+		user, err := usermgrSvc.SignUp(r.Context(), req.FullName, req.Password)
+
+		if err != nil {
+			httpserver.RenderError(w, http.StatusBadRequest, fmt.Errorf("connot register user: %w", err))
+
+			panic(fmt.Errorf("cannot register %w", err))
+
+		}
+
 		log.Printf("Requête SignUp: %+v", req)
 
-		httpserver.RenderJSON(w, http.StatusOK, map[string]string{
-			"server": "voiture",
+		httpserver.RenderJSON(w, http.StatusOK, map[string]interface{}{
+			"data": user,
 		})
 
 	}

@@ -41,9 +41,8 @@ function App({ name }: { name: string }) {
       <button
         onClick={() =>
           handleCreateUser({
-            fullName: "johnDoe",
-            email: "johnDoe@gmail.com",
-            role: "CUSTOMER",
+            fullName: "janeDoeloe",
+            password: "janeDoe@gmail.com",
           })
         }
       >
