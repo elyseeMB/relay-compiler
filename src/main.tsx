@@ -14,10 +14,10 @@ class RootElement extends HTMLElement {
   }
 
   attributeChangedCallback(name: string, oldValue: string, newValue: string) {
-    console.log(`Attribute ${name} has changed.
-   old Value: ${oldValue}
-    new value: ${newValue}
-    `);
+    //   console.log(`Attribute ${name} has changed.
+    //  old Value: ${oldValue}
+    //   new value: ${newValue}
+    //   `);
   }
 
   connectedCallback() {

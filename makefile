@@ -4,7 +4,7 @@ DOCKER_COMPOSE= $(DOCKER) compose -f compose.yml $(DOCKER_COMPOSE_FLAGS)
 
 .PHONY: dev
 dev: ## start environment develop
-	@make -j2 stack-up backend frontend
+	@make -j2 stack-up frontend backend
 
 frontend:
 	pnpm run dev
@@ -12,7 +12,13 @@ frontend:
 
 .PHONY: backend
 backend:
-	go run cmd/relay-compiler/main.go
+	air
+
+.PHONY: clean
+clean:
+	go clean -cache
+	backend
+
 
 .PHONY: generate
 generate:

@@ -15,7 +15,7 @@ type Server struct {
 
 func NewServer() (*Server, error) {
 	apiServer, err := api.NewServer(api.Config{
-		AllowedOrigins: []string{"*"},
+		AllowedOrigins: []string{"http://localhost:5173"},
 	})
 
 	if err != nil {
