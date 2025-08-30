@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/elyseeMB/relay-compiler/pkg/coredata"
+	"github.com/elyseeMB/relay-compiler/pkg/crypto/passwdhash"
 	"github.com/elyseeMB/relay-compiler/pkg/server"
 	"github.com/elyseeMB/relay-compiler/pkg/usrmgr"
 	"github.com/prometheus/client_golang/prometheus"
@@ -28,8 +29,8 @@ type (
 	}
 
 	config struct {
-		Hostname string   `json:hostname`
-		Pg       pgConfig `json:pg`
+		Hostname string   `json:"hostname"`
+		Pg       pgConfig `json:'pg'`
 	}
 )
 
@@ -68,14 +69,21 @@ func (impl *Implm) Run(parentCtx context.Context, l *log.Logger, r prometheus.Re
 		impl.cfg.Pg.Options(pg.WithLogger(l), pg.WithRegisterer(r), pg.WithTracerProvider(tp))...,
 	)
 	if err != nil {
-		return fmt.Errorf("Cannot create pg client: %w", err)
+		return fmt.Errorf("cannot create pg client: %w", err)
 	}
 
 	wg := sync.WaitGroup{}
 	ctx, cancel := context.WithCancelCause(ctx)
 	defer cancel(context.Canceled)
 
-	usrmgrService, err := usrmgr.NewService(ctx, pgClient)
+	pepper := []byte("12345678901234567890123456789012")
+
+	hp, err := passwdhash.NewProfile(pepper, uint32(800000))
+	if err != nil {
+		return fmt.Errorf("cannot create hashing profile: %w", err)
+	}
+
+	usrmgrService, err := usrmgr.NewService(ctx, pgClient, hp)
 
 	// Exécuter les migrations
 	err = migrator.NewMigrator(pgClient, coredata.Migrations, l.Named("migrations")).Run(parentCtx, "migrations")
