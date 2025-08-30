@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -14,7 +15,7 @@ type (
 	User struct {
 		ID       int    `db:"id"`
 		FullName string `db:"fullname"`
-		Password string `db:"password"`
+		Password []byte `db:"password"`
 	}
 
 	Users []*User
@@ -22,7 +23,15 @@ type (
 	ErrUserNotFound struct {
 		Identifier string
 	}
+
+	ErrUserAlreadyExists struct {
+		message string
+	}
 )
+
+func (e ErrUserAlreadyExists) Error() string {
+	return e.message
+}
 
 func (e ErrUserNotFound) Error() string {
 	return fmt.Sprintf("user not found: %q", e.Identifier)
@@ -44,7 +53,11 @@ func (u *User) Insert(ctx context.Context, conn pg.Conn) error {
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) {
-			return pgErr
+			if pgErr.Code == "23505" && strings.Contains(pgErr.ConstraintName, "FullName") {
+				return &ErrUserAlreadyExists{
+					message: fmt.Sprintf("user with email %s already exists", u.FullName),
+				}
+			}
 		}
 
 		return err
