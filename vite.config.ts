@@ -1,7 +1,28 @@
 import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
+import preact from "@preact/preset-vite";
 
-// https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react({ babel: { plugins: ["relay"] } })],
+  plugins: [preact({ babel: { plugins: ["relay"] } })],
+
+  base: "/",
+  resolve: {
+    alias: {
+      react: "preact/compat",
+      "react-dom": "preact/compat",
+    },
+  },
+  build: {
+    manifest: true,
+    outDir: "../public/assets/",
+    rollupOptions: {
+      input: {
+        main: "./main.tsx",
+      },
+      output: {
+        entryFileNames: "[name]-[hash].js",
+        assetFileNames: "[name]-[hash][extname]",
+        chunkFileNames: "[name]-[hash][extname]",
+      },
+    },
+  },
 });
