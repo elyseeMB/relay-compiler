@@ -19,8 +19,10 @@ function App({ name }: { name: string }) {
   const { pushToast } = useToast();
   const [mutation, isLoading] = useMutation(userMutation);
 
-  const handleCreateUser = async (data: Record<string, any>) => {
-    console.log(data);
+  const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+
     const response = await fetch(
       "http://localhost:8080/api/console/v1/auth/register",
       {
@@ -29,17 +31,13 @@ function App({ name }: { name: string }) {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify(data),
+        body: JSON.stringify(Object.fromEntries(formData)),
       }
     );
 
     if (response.ok) {
       console.log("ok");
     }
-  };
-
-  const handleSubmit: FormEventHandler<HTMLFormElement> = (e) => {
-    e.preventDefault();
   };
 
   return (
@@ -64,17 +62,7 @@ function App({ name }: { name: string }) {
 
           <div className="field">
             <div className="control">
-              <button
-                onClick={() =>
-                  handleCreateUser({
-                    fullName: "johnDoe",
-                    password: "janeDoe4@gmail.com",
-                  })
-                }
-                className="button is-link"
-              >
-                Submit
-              </button>
+              <button className="button is-link">Submit</button>
             </div>
           </div>
         </form>

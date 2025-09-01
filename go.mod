@@ -13,6 +13,7 @@ require (
 )
 
 require (
+	github.com/a-h/templ v0.3.943 // indirect
 	github.com/agnivade/levenshtein v1.2.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
