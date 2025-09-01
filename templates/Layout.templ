@@ -6,11 +6,12 @@ templ Layout(name string) {
 		<head>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-			<title>Go boilerplate</title>
+			<title>title</title>
 			@templ.Raw(ctx.Value("assets").(string))
 		</head>
 		<body>
 			<h1>Hello { name }</h1>
+			<div id="root"></div>
 			<main>
 				{ children... }
 			</main>

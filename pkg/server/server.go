@@ -75,6 +75,8 @@ func (s *Server) setupRoutes() {
 		s.apiServer.ServeHTTP(w, r)
 	}))
 
+	s.router.HandleFunc("/assets/*", viteAssets.ServeAssets)
+
 	s.router.Mount("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Serve the root
 		if r.URL.Path == "/" {
