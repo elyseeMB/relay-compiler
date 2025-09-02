@@ -30,7 +30,7 @@ func SignUpHandler(usermgrSvc *usrmgr.Service) http.HandlerFunc {
 			return
 		}
 
-		user, err := usermgrSvc.SignUp(r.Context(), req.FullName, req.Password)
+		user, session, err := usermgrSvc.SignUp(r.Context(), req.FullName, req.Password)
 
 		if err != nil {
 			var errUserAlreadyExists *coredata.ErrUserAlreadyExists
@@ -53,7 +53,8 @@ func SignUpHandler(usermgrSvc *usrmgr.Service) http.HandlerFunc {
 		log.Printf("Requête SignUp: %+v", req)
 
 		httpserver.RenderJSON(w, http.StatusOK, map[string]interface{}{
-			"data": user,
+			"data":    user,
+			"session": session,
 		})
 
 	}

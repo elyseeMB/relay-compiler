@@ -3,4 +3,5 @@ CREATE TABLE sessions(
     user_id INTEGER NOT NULL REFERENCES users(id),
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL
+
 )

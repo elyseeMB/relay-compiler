@@ -38,17 +38,15 @@ func (e ErrUserNotFound) Error() string {
 }
 
 func (u *User) Insert(ctx context.Context, conn pg.Conn) error {
-	q := `INSERT INTO users(fullname, password) VALUES (
-	@fullname,
-	@password
- )`
 
 	args := pgx.StrictNamedArgs{
 		"fullname": u.FullName,
 		"password": u.Password,
 	}
 
-	_, err := conn.Exec(ctx, q, args)
+	err := conn.QueryRow(ctx, `INSERT INTO users(fullname, password) VALUES (
+		@fullname,
+		@password) RETURNING  id`, args).Scan(&u.ID)
 
 	if err != nil {
 		var pgErr *pgconn.PgError
