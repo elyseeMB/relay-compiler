@@ -10,14 +10,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/elyseeMB/relay-compiler/pkg/coredata"
 	"github.com/elyseeMB/relay-compiler/pkg/crypto/passwdhash"
 	"github.com/elyseeMB/relay-compiler/pkg/server"
 	"github.com/elyseeMB/relay-compiler/pkg/usrmgr"
 	"github.com/prometheus/client_golang/prometheus"
 	"go.gearno.de/kit/httpserver"
 	"go.gearno.de/kit/log"
-	"go.gearno.de/kit/migrator"
 	"go.gearno.de/kit/pg"
 	"go.gearno.de/kit/unit"
 	"go.opentelemetry.io/otel/trace"
@@ -86,10 +84,10 @@ func (impl *Implm) Run(parentCtx context.Context, l *log.Logger, r prometheus.Re
 	usrmgrService, err := usrmgr.NewService(ctx, pgClient, hp)
 
 	// Exécuter les migrations
-	err = migrator.NewMigrator(pgClient, coredata.Migrations, l.Named("migrations")).Run(parentCtx, "migrations")
-	if err != nil {
-		return fmt.Errorf("cannot migrate database schema: %w", err)
-	}
+	// err = migrator.NewMigrator(pgClient, coredata.Migrations, l.Named("migrations")).Run(parentCtx, "migrations")
+	// if err != nil {
+	// 	return fmt.Errorf("cannot migrate database schema: %w", err)
+	// }
 
 	serverHandler, err := server.NewServer(server.Config{
 		AllowedOrigins: []string{"http://localhost:5173"},
