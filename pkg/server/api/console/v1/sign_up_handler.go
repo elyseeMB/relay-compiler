@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/elyseeMB/relay-compiler/pkg/coredata"
+	securecookie "github.com/elyseeMB/relay-compiler/pkg/secureCookie"
 	"github.com/elyseeMB/relay-compiler/pkg/usrmgr"
 	"go.gearno.de/kit/httpserver"
 )
@@ -49,6 +50,13 @@ func SignUpHandler(usermgrSvc *usrmgr.Service) http.HandlerFunc {
 			panic(fmt.Errorf("cannot register user: %w", err))
 
 		}
+
+		securecookie.Set(w, securecookie.DefaultConfig(
+			"test_cookie",
+			"test_secret",
+		),
+			session.ID.String(),
+		)
 
 		log.Printf("Requête SignUp: %+v", req)
 
