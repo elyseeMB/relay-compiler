@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/elyseeMB/relay-compiler/pkg/gid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"go.gearno.de/kit/pg"
@@ -13,9 +14,9 @@ import (
 
 type (
 	User struct {
-		ID       int    `db:"id"`
-		FullName string `db:"fullname"`
-		Password []byte `db:"password"`
+		ID       gid.GID `db:"id"`
+		FullName string  `db:"fullname"`
+		Password []byte  `db:"password"`
 	}
 
 	Users []*User
@@ -39,14 +40,21 @@ func (e ErrUserNotFound) Error() string {
 
 func (u *User) Insert(ctx context.Context, conn pg.Conn) error {
 
+	q := `INSERT INTO users(id, fullname, password)
+	VALUES(
+		@id,
+		@fullname,
+		@password
+	)
+	`
+
 	args := pgx.StrictNamedArgs{
+		"id":       u.ID,
 		"fullname": u.FullName,
 		"password": u.Password,
 	}
 
-	err := conn.QueryRow(ctx, `INSERT INTO users(fullname, password) VALUES (
-		@fullname,
-		@password) RETURNING  id`, args).Scan(&u.ID)
+	_, err := conn.Exec(ctx, q, args)
 
 	if err != nil {
 		var pgErr *pgconn.PgError
