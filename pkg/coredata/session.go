@@ -5,14 +5,15 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/elyseeMB/relay-compiler/pkg/gid"
 	"github.com/jackc/pgx/v5"
 	"go.gearno.de/kit/pg"
 )
 
 type (
 	Session struct {
-		ID        int         `db:"id"`
-		UserId    int         `db:"user_id"`
+		ID        gid.GID     `db:"id"`
+		UserId    gid.GID     `db:"user_id"`
 		Data      SessionData `db:"data"`
 		ExpiredAt time.Time   `db:"expired_at"`
 		CreateAt  time.Time   `db:"created_at"`

@@ -7,6 +7,7 @@ import (
 
 	"github.com/elyseeMB/relay-compiler/pkg/coredata"
 	"github.com/elyseeMB/relay-compiler/pkg/crypto/passwdhash"
+	"github.com/elyseeMB/relay-compiler/pkg/gid"
 	"go.gearno.de/kit/pg"
 )
 
@@ -41,22 +42,22 @@ func (s Service) SignUp(ctx context.Context, fullname, password string) (*coreda
 	now := time.Now()
 
 	user := &coredata.User{
+		ID:       gid.New(gid.NilTenant, coredata.UserEntityType),
 		FullName: fullname,
 		Password: hashedPassword,
 	}
 
-	var session *coredata.Session
+	session := &coredata.Session{
+		ID:        gid.New(gid.NilTenant, coredata.UserSessionType),
+		UserId:    user.ID,
+		ExpiredAt: now.Add(24 * time.Hour),
+		CreateAt:  now,
+		UpdateAt:  now,
+	}
 
 	if err := s.pg.WithTx(ctx, func(tx pg.Conn) error {
 		if err := user.Insert(ctx, tx); err != nil {
 			return fmt.Errorf("cannot insert user: %w", err)
-		}
-
-		session = &coredata.Session{
-			UserId:    user.ID,
-			ExpiredAt: now.Add(24 * time.Hour),
-			CreateAt:  now,
-			UpdateAt:  now,
 		}
 
 		if err := session.Insert(ctx, tx); err != nil {
