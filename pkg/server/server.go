@@ -37,7 +37,6 @@ func NewServer(cfg Config) (*Server, error) {
 	}
 
 	apiServer, err := api.NewServer(apiCfg)
-
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +55,6 @@ func NewServer(cfg Config) (*Server, error) {
 }
 
 func (s *Server) setupRoutes() {
-
 	publicFS, err := fs.Sub(assets, "public")
 	if err != nil {
 		panic(fmt.Sprintf("Cannot sub public directory %v", err))
@@ -66,8 +64,8 @@ func (s *Server) setupRoutes() {
 	frontMiddleware := createFrontEndMiddleware(*viteAssets)
 	publicServer := http.FileServer(http.FS(publicFS))
 
+	// API routes
 	s.router.Mount("/api", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
 		r.URL.Path = strings.TrimPrefix(r.URL.Path, "/api")
 		if r.URL.Path == "" {
 			r.URL.Path = "/"
@@ -75,22 +73,28 @@ func (s *Server) setupRoutes() {
 		s.apiServer.ServeHTTP(w, r)
 	}))
 
+	// Assets (JS/CSS) routes
 	s.router.HandleFunc("/assets/*", viteAssets.ServeAssets)
 
-	s.router.Mount("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Serve the root
+	// Catch-all pour les routes frontend
+	s.router.HandleFunc("/*", func(w http.ResponseWriter, r *http.Request) {
+		// Pour la route racine, utilise le handler React
 		if r.URL.Path == "/" {
-			if r.URL.Path == "/" {
-				frontMiddleware(web.HomeHandler)(w, r)
-				return
-			}
-			// Otherwise serve public files
-			publicServer.ServeHTTP(w, r)
+			frontMiddleware(web.HomeHandler)(w, r)
+			return
 		}
-		// Otherwise serve public files
-		publicServer.ServeHTTP(w, r)
-	}))
 
+		// Pour les autres fichiers statiques, essaie de les servir
+		// Si le fichier n'existe pas, sert l'app React (SPA routing)
+		if strings.HasPrefix(r.URL.Path, "/assets/") {
+			// Les assets sont déjà gérés plus haut
+			http.NotFound(w, r)
+			return
+		}
+
+		// Essaie de servir le fichier statique
+		publicServer.ServeHTTP(w, r)
+	})
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {

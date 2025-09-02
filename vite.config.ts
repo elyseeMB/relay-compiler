@@ -13,10 +13,10 @@ export default defineConfig({
   },
   build: {
     manifest: true,
-    outDir: "../public/assets/",
+    outDir: "./pkg/server/public/assets/",
     rollupOptions: {
       input: {
-        main: "./main.tsx",
+        main: "./assets/main.tsx",
       },
       output: {
         entryFileNames: "[name]-[hash].js",
