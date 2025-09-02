@@ -1,5 +1,5 @@
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     fullName VARCHAR(50) NOT NULL UNIQUE,
-    password TEXT NOT NULL
+    password BYTEA NOT NULL
 );
