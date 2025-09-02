@@ -1,0 +1,1 @@
+ALTER TABLE sessions ADD COLUMN data jsonb NOT NULL DEFAULT '{}';
