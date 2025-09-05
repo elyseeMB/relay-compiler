@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/elyseeMB/relay-compiler/pkg/server/api"
+	console_v1 "github.com/elyseeMB/relay-compiler/pkg/server/api/console/v1"
 	"github.com/elyseeMB/relay-compiler/pkg/server/web"
 	"github.com/elyseeMB/relay-compiler/pkg/usrmgr"
 	"github.com/go-chi/chi/v5"
@@ -27,12 +28,14 @@ type Config struct {
 	AllowedOrigins []string
 	Usrmgr         *usrmgr.Service
 	Logger         *log.Logger
+	Auth           console_v1.AuthConfig
 }
 
 func NewServer(cfg Config) (*Server, error) {
 	apiCfg := api.Config{
 		AllowedOrigins: cfg.AllowedOrigins,
 		Usrmgr:         cfg.Usrmgr,
+		Auth:           cfg.Auth,
 		Logger:         cfg.Logger.Named("api"),
 	}
 
@@ -73,26 +76,19 @@ func (s *Server) setupRoutes() {
 		s.apiServer.ServeHTTP(w, r)
 	}))
 
-	// Assets (JS/CSS) routes
 	s.router.HandleFunc("/assets/*", viteAssets.ServeAssets)
 
-	// Catch-all pour les routes frontend
 	s.router.HandleFunc("/*", func(w http.ResponseWriter, r *http.Request) {
-		// Pour la route racine, utilise le handler React
 		if r.URL.Path == "/" {
 			frontMiddleware(web.HomeHandler)(w, r)
 			return
 		}
 
-		// Pour les autres fichiers statiques, essaie de les servir
-		// Si le fichier n'existe pas, sert l'app React (SPA routing)
 		if strings.HasPrefix(r.URL.Path, "/assets/") {
-			// Les assets sont déjà gérés plus haut
 			http.NotFound(w, r)
 			return
 		}
 
-		// Essaie de servir le fichier statique
 		publicServer.ServeHTTP(w, r)
 	})
 }

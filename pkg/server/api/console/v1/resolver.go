@@ -3,6 +3,7 @@ package console_v1
 import (
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
@@ -21,17 +22,32 @@ import (
 //
 // It serves as dependency injection for your app, add any dependencies you require here.
 
-type Resolver struct {
-	Articles []*types.Article
-	Users    []*types.User
-}
+type (
+	AuthConfig struct {
+		CookieName      string
+		CookieDomain    string
+		SessionDuration time.Duration
+		CokkieSecret    string
+	}
+
+	Resolver struct {
+		Articles []*types.Article
+		Users    []*types.User
+	}
+
+	ConfigNewMux struct {
+		AuthConfig AuthConfig
+		Logger     *log.Logger
+		UsrmgrSvc  *usrmgr.Service
+	}
+
+	SignUpConfig struct {
+		AuthConfig AuthConfig
+		UsrmgrSvc  *usrmgr.Service
+	}
+)
 
 const defaultPort = "8080"
-
-type ConfigNewMux struct {
-	Logger    *log.Logger
-	UsrmgrSvc *usrmgr.Service
-}
 
 func NewMux(cfg *ConfigNewMux) *chi.Mux {
 
@@ -42,7 +58,10 @@ func NewMux(cfg *ConfigNewMux) *chi.Mux {
 
 	r := chi.NewMux()
 
-	r.Post("/auth/register", SignUpHandler(cfg.UsrmgrSvc))
+	r.Post("/auth/register", SignUpHandler(SignUpConfig{
+		AuthConfig: cfg.AuthConfig,
+		UsrmgrSvc:  cfg.UsrmgrSvc,
+	}))
 
 	r.Get("/", playground.Handler("GraphQL", "/api/console/v1/query"))
 	r.Post("/query", graphqlHandler())

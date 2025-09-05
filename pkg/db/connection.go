@@ -12,6 +12,7 @@ import (
 
 	"github.com/elyseeMB/relay-compiler/pkg/crypto/passwdhash"
 	"github.com/elyseeMB/relay-compiler/pkg/server"
+	console_v1 "github.com/elyseeMB/relay-compiler/pkg/server/api/console/v1"
 	"github.com/elyseeMB/relay-compiler/pkg/usrmgr"
 	"github.com/prometheus/client_golang/prometheus"
 	"go.gearno.de/kit/httpserver"
@@ -27,8 +28,9 @@ type (
 	}
 
 	config struct {
-		Hostname string   `json:"hostname"`
-		Pg       pgConfig `json:'pg'`
+		Hostname string     `json:"hostname"`
+		Pg       pgConfig   `json:"pg"`
+		Auth     authConfig `json:"auth"`
 	}
 )
 
@@ -45,6 +47,19 @@ func New() *Implm {
 				Username: "tp",
 				Password: "password",
 				Database: "tp_database",
+			},
+			Auth: authConfig{
+				Password: passwordConfig{
+					Pepper:     "this-is-a-secure-pepper",
+					Iterations: 1000000,
+				},
+				Cookie: cookieConfig{
+					Name:     "SSID",
+					Secret:   "this-is-a-secure-cookie",
+					Duration: 24,
+					Domain:   "localhost",
+				},
+				DisableSignup: false,
 			},
 		},
 	}
@@ -93,6 +108,12 @@ func (impl *Implm) Run(parentCtx context.Context, l *log.Logger, r prometheus.Re
 		AllowedOrigins: []string{"http://localhost:5173"},
 		Logger:         l.Named("http.Server"),
 		Usrmgr:         usrmgrService,
+		Auth: console_v1.AuthConfig{
+			CookieName:      impl.cfg.Auth.Cookie.Name,
+			CookieDomain:    impl.cfg.Auth.Cookie.Domain,
+			SessionDuration: time.Duration(impl.cfg.Auth.Cookie.Duration) * time.Hour,
+			CokkieSecret:    impl.cfg.Auth.Cookie.Secret,
+		},
 	})
 
 	port := os.Getenv("PORT")
