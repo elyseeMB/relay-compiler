@@ -17,6 +17,7 @@ type (
 		AllowedOrigins []string
 		Usrmgr         *usrmgr.Service
 		Logger         *log.Logger
+		Auth           console_v1.AuthConfig
 	}
 
 	Server struct {
@@ -54,6 +55,10 @@ func notFound(w http.ResponseWriter, r *http.Request) {
 }
 
 func NewServer(cfg Config) (*Server, error) {
+	if cfg.Usrmgr == nil {
+		return nil, ErrMissingUsrmgrService
+	}
+
 	return &Server{
 		cfg: cfg,
 	}, nil
@@ -75,13 +80,23 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Debug:              false,
 	}
 
+	w.Header().Set("X-Frame-Options", "DENY")
+	w.Header().Set("X-XSS-Protection", "0")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.Header().Set("Referrer-Policy", "no-referrer")
+	w.Header().Set("Content-Security-Policy", "default-src 'self'")
+	w.Header().Set("Permissions-Policy", "microphone=(), camera=(), geolocation=()")
+
 	router := chi.NewRouter()
+	router.MethodNotAllowed(methodNotAllowed)
+	router.NotFound(notFound)
 
 	router.Use(cors.Handler(corsOpts))
 
 	cfgMux := console_v1.ConfigNewMux{
-		Logger:    s.cfg.Logger.Named("console.v1"),
-		UsrmgrSvc: s.cfg.Usrmgr,
+		Logger:     s.cfg.Logger.Named("console.v1"),
+		UsrmgrSvc:  s.cfg.Usrmgr,
+		AuthConfig: s.cfg.Auth,
 	}
 
 	router.Mount(
