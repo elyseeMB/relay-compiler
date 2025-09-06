@@ -1,8 +1,9 @@
 import { defineConfig } from "vite";
+import tailwindCSS from "@tailwindcss/vite";
 import preact from "@preact/preset-vite";
 
 export default defineConfig({
-  plugins: [preact({ babel: { plugins: ["relay"] } })],
+  plugins: [preact({ babel: { plugins: ["relay"] } }), tailwindCSS()],
 
   base: "/",
   resolve: {
