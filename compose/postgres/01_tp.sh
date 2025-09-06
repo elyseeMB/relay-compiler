@@ -1,0 +1,24 @@
+#! /bin/sh
+set -eu
+
+psql -v ON_ERROR_STOP=1 -U $POSTGRES_USER <<-EOF
+CREATE USER tp;
+ALTER USER tp WITH SUPERUSER;
+ALTER USER tp PASSWORD 'password';
+CREATE DATABASE tp_database;
+GRANT ALL PRIVILEGES ON DATABASE tp_database TO tp;
+CREATE DATABASE tp_database_test;
+GRANT ALL PRIVILEGES ON DATABASE tp_database_test TO tp;
+EOF
+
+psql -v ON_ERROR_STOP=1 -U $POSTGRES_USER -d tp_database <<-EOF
+ALTER SCHEMA public OWNER TO tp
+GRANT ALL ON SCHEMA public TO tp
+EOF
+
+psql -v ON_ERROR_STOP=1 -U $POSTGRES_USER -d tp_database_test <<-EOF
+ALTER SCHEMA public OWNER TO tp
+GRANT ALL ON SCHEMA public TO tp
+EOF
+
+
