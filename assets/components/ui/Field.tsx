@@ -1,6 +1,5 @@
 import React, { forwardRef } from "preact/compat";
 import { InputHTMLAttributes } from "preact/compat";
-import { $ZodCheckGreaterThan } from "zod/v4/core";
 
 type Params = {
   htmlFor: string;

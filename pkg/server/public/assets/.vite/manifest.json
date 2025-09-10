@@ -1,11 +1,23 @@
 {
   "assets/main.tsx": {
-    "file": "main-Dc8l1Vut.js",
+    "file": "main-DSeO4EY8.js",
     "name": "main",
     "src": "assets/main.tsx",
     "isEntry": true,
+    "dynamicImports": [
+      "assets/pages/auth/RegisterPage.tsx"
+    ],
     "css": [
-      "main-fz5usbfP.css"
+      "main-PwMIYQc4.css"
+    ]
+  },
+  "assets/pages/auth/RegisterPage.tsx": {
+    "file": "RegisterPage-BNL5ntLZ.js",
+    "name": "RegisterPage",
+    "src": "assets/pages/auth/RegisterPage.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "assets/main.tsx"
     ]
   }
 }

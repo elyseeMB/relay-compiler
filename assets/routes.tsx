@@ -2,13 +2,18 @@ import React from "preact/compat";
 import { ComponentType, Suspense, lazy, type FC } from "preact/compat";
 import { AuthLayout } from "./layouts/AuthLayout.tsx";
 import { createBrowserRouter, type RouteObject } from "react-router";
+import { lazy as lazyCustom } from "./utils/react-lazy.ts";
 
-type LazyComponent<T = any> = ReturnType<typeof lazy<ComponentType<T>>>;
+export type LazyComponent<T = any> = ReturnType<typeof lazy<ComponentType<T>>>;
 
 type AppRoute = {
   children?: AppRoute[];
   Component: FC<any> | ComponentType<any> | LazyComponent;
 } & Omit<RouteObject, "Component" | "children">;
+
+const Home = () => {
+  return <div>hello word</div>;
+};
 
 const routes = [
   {
@@ -17,9 +22,14 @@ const routes = [
     children: [
       {
         path: "register",
-        Component: lazy(() => import("./pages/auth/RegisterPage.tsx")),
+        Component: lazyCustom(() => import("./pages/auth/RegisterPage.tsx")),
       },
     ],
+  },
+
+  {
+    path: "/",
+    Component: Home,
   },
 ] satisfies AppRoute[];
 
