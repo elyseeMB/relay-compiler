@@ -8,6 +8,8 @@ import (
 	"net/http"
 
 	"github.com/elyseeMB/relay-compiler/pkg/coredata"
+	"github.com/elyseeMB/relay-compiler/pkg/gid"
+	securecookie "github.com/elyseeMB/relay-compiler/pkg/secureCookie"
 	"github.com/elyseeMB/relay-compiler/pkg/usrmgr"
 	"go.gearno.de/kit/httpserver"
 )
@@ -17,9 +19,18 @@ type (
 		Password string `json:"password"`
 		FullName string `json:"Fullname"`
 	}
+
+	SignUpResponse struct {
+		User struct{}
+	}
+
+	UserResponse struct {
+		ID       gid.GID `json:"id"`
+		Fullname string  `json:"fullName"`
+	}
 )
 
-func SignUpHandler(usermgrSvc *usrmgr.Service) http.HandlerFunc {
+func SignUpHandler(cfg SignUpConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		var req SignUpRequest
@@ -30,7 +41,7 @@ func SignUpHandler(usermgrSvc *usrmgr.Service) http.HandlerFunc {
 			return
 		}
 
-		user, session, err := usermgrSvc.SignUp(r.Context(), req.FullName, req.Password)
+		user, session, err := cfg.UsrmgrSvc.SignUp(r.Context(), req.FullName, req.Password)
 
 		if err != nil {
 			var errUserAlreadyExists *coredata.ErrUserAlreadyExists
@@ -49,6 +60,13 @@ func SignUpHandler(usermgrSvc *usrmgr.Service) http.HandlerFunc {
 			panic(fmt.Errorf("cannot register user: %w", err))
 
 		}
+
+		securecookie.Set(w, securecookie.DefaultConfig(
+			cfg.AuthConfig.CookieName,
+			cfg.AuthConfig.CokkieSecret,
+		),
+			session.ID.String(),
+		)
 
 		log.Printf("Requête SignUp: %+v", req)
 

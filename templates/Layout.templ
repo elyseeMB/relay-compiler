@@ -10,7 +10,6 @@ templ Layout(name string) {
 			@templ.Raw(ctx.Value("assets").(string))
 		</head>
 		<body>
-			<h1>Hello { name }</h1>
 			<div id="root"></div>
 			<main>
 				{ children... }
