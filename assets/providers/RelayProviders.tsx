@@ -5,11 +5,11 @@ import {
   RecordSource,
   Store,
 } from "relay-runtime";
-import { PropsWithChildren } from "react";
+import { PropsWithChildren } from "preact/compat";
 import { RelayEnvironmentProvider } from "react-relay";
 
-function buildEndpoint(path: string): string {
-  const host = "https://localhost:8080";
+export function buildEndpoint(path: string): string {
+  const host = import.meta.env.VITE_API_URL;
 
   if (!host) {
     return path;
