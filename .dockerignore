@@ -7,4 +7,9 @@ Dockerfile
 compose
 **/node_modules
 **/dist
+pkg/server/public/*
+__generated__/
+pkg/server/api/*/v1/types/types.go
+pkg/server/api/*/v1/schema.graphql
+.env
 
